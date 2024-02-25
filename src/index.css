@@ -5,5 +5,5 @@
 body,
 html,
 #root {
-  @apply bg-slate-950 text-neutral-300;
+  @apply bg-slate-950 text-neutral-200;
 }

@@ -1,14 +1,15 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
+import uniqid from 'uniqid';
 
-type Task = {
-  id: number;
+export type Task = {
+  id: string;
   content: string;
 };
 
 export type Column = {
-  id: number;
-  title?: string;
-  tasks?: Task[];
+  id: string;
+  title: string;
+  tasks: Task[];
 };
 
 type Board = {
@@ -16,16 +17,51 @@ type Board = {
 };
 
 const initialState: Board = {
-  columns: [],
+  columns: [
+    { id: uniqid(), title: 'Todo', tasks: [] },
+    { id: uniqid(), title: 'Work in Progress', tasks: [] },
+    { id: uniqid(), title: 'Done', tasks: [] },
+  ],
 };
 
 const kanbanSlice = createSlice({
   name: 'kanban-slice',
   initialState: initialState,
   reducers: {
-    addColumn: (state, action: PayloadAction<number>) => {
-      const id = action.payload;
-      state.columns.push({ id, title: `Column ${id}`, tasks: [] });
+    addColumn: (state) => {
+      const id = uniqid();
+
+      state.columns.push({
+        id,
+        title: `Column ${state.columns.length + 1}`,
+        tasks: [],
+      });
+    },
+    deleteColumn: (state, action: PayloadAction<string>) => {
+      const removeId = action.payload;
+      state.columns = state.columns.filter((column) => column.id !== removeId);
+    },
+    addTaskToColumnById: (state, action: PayloadAction<string>) => {
+      const columnId = action.payload;
+      const newTask: Task = {
+        content: 'New Task',
+        id: uniqid(),
+      };
+
+      const column = state.columns.find((column) => column.id === columnId);
+      if (!column) return;
+      column.tasks.push(newTask);
+    },
+    deleteTaskById: (
+      state,
+      action: PayloadAction<{ taskId: string; columnId: string }>
+    ) => {
+      const { taskId, columnId } = action.payload;
+
+      const column = state.columns.find((column) => column.id === columnId);
+      if (!column) return;
+
+      column.tasks = column.tasks.filter((task) => task.id !== taskId);
     },
   },
 });

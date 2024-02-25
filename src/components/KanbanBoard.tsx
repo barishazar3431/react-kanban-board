@@ -7,7 +7,7 @@ function KanbanBoard() {
   const dispatch = useAppDispatch();
 
   const handleAddColumn = () => {
-    dispatch(kanbanActions.addColumn(columns.length));
+    dispatch(kanbanActions.addColumn());
   };
 
   return (
@@ -18,7 +18,7 @@ function KanbanBoard() {
         ))}
         <button
           onClick={handleAddColumn}
-          className="bg-slate-800  whitespace-nowrap px-4 py-2 rounded-md border border-transparent hover:border-red-500 transition-all hover:bg-slate-900"
+          className="bg-slate-900  whitespace-nowrap px-4 py-2 rounded-md border border-transparent hover:border-red-500 transition-all"
         >
           Add Column
         </button>
