@@ -22,14 +22,14 @@ function KanbanTaskItem({ task, columnId }: Props) {
   return (
     <div
       key={task.id}
-      className="bg-slate-950 min-h-20  rounded-xl p-2 flex items-center justify-between group"
+      className="bg-slate-950 min-h-20  rounded-xl p-2 flex items-center justify-between group border border-transparent hover:border-red-500"
     >
       <p className="text-sm text-white self-start">{task.content}</p>
       <button
         onClick={deleteTaskHandler}
-        className="text-lg p-2 text-transparent group-hover:text-neutral-500 transition-all"
+        className="p-2 text-lg text-transparent group-hover:text-neutral-500 transition-all group/button"
       >
-        <RiDeleteBinLine className="hover:text-neutral-400 transition-all" />
+        <RiDeleteBinLine className="group-hover/button:text-neutral-400 block transition-all" />
       </button>
     </div>
   );

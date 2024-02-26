@@ -1,3 +1,4 @@
+import { arrayMove } from '@dnd-kit/sortable';
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 import uniqid from 'uniqid';
 
@@ -62,6 +63,13 @@ const kanbanSlice = createSlice({
       if (!column) return;
 
       column.tasks = column.tasks.filter((task) => task.id !== taskId);
+    },
+    moveColumns: (
+      state,
+      action: PayloadAction<{ from: number; to: number }>
+    ) => {
+      const { from, to } = action.payload;
+      state.columns = arrayMove(state.columns, from, to);
     },
   },
 });
