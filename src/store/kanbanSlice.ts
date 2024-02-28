@@ -18,13 +18,19 @@ export type Board = {
   columns: Column[];
 };
 
-const initialState: Board = {
+let initialState: Board = {
   columns: [
     { id: uniqid(), title: 'Todo', tasks: [] },
     { id: uniqid(), title: 'Work in Progress', tasks: [] },
     { id: uniqid(), title: 'Done', tasks: [] },
   ],
 };
+
+const columnsJson = localStorage.getItem('columns');
+if (columnsJson) {
+  const columns = JSON.parse(columnsJson);
+  initialState = { columns };
+}
 
 const kanbanSlice = createSlice({
   name: 'kanban-slice',
@@ -119,6 +125,41 @@ const kanbanSlice = createSlice({
         taskParentIndex
       ].tasks.filter((task) => task.id !== taskId);
       state.columns[columnIndex].tasks.push(task);
+    },
+    renameColumn: (
+      state,
+      action: PayloadAction<{ columnId: string; newTitle: string }>
+    ) => {
+      const { columnId, newTitle } = action.payload;
+
+      const column = state.columns.find((column) => column.id === columnId);
+
+      if (!column) return;
+
+      column.title = newTitle;
+    },
+    renameTask: (
+      state,
+      action: PayloadAction<{ taskId: string; newContent: string }>
+    ) => {
+      const { taskId, newContent } = action.payload;
+
+      const parentId = getParentIdOfTask(state.columns, taskId);
+      const parentColumn = state.columns.find(
+        (column) => column.id === parentId
+      );
+
+      if (!parentColumn) return;
+
+      const task = parentColumn.tasks.find((task) => task.id === taskId);
+      if (!task) return;
+
+      task.content = newContent;
+    },
+    setBoard: (state, action: PayloadAction<Board>) => {
+      const board = action.payload;
+      console.log(board);
+      state.columns = board.columns;
     },
   },
 });

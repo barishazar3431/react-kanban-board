@@ -4,12 +4,13 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { useMemo } from 'react';
 import { FaPlusCircle } from 'react-icons/fa';
 import { RiDeleteBinLine } from 'react-icons/ri';
+import useEditable from '../hooks/useEditable';
 import { Column, kanbanActions } from '../store/kanbanSlice';
 import { useAppDispatch, useAppSelector } from '../util/reduxHooks';
 import KanbanTaskItem from './KanbanTaskItem';
-import { useMemo } from 'react';
 
 type Props = {
   column: Column;
@@ -20,6 +21,9 @@ function KanbanColumn({ column }: Props) {
   const isLastColumn = useAppSelector(
     (state) => state.kanban.columns.length === 1
   );
+  const { handleBlur, handleKeyDown, isEditable, setIsEditable } =
+    useEditable();
+
   const { tasks, id, title } = column;
 
   const taskIds = useMemo(() => tasks.map((task) => task.id), [tasks]);
@@ -52,6 +56,16 @@ function KanbanColumn({ column }: Props) {
     dispatch(kanbanActions.addTaskToColumnById(column.id));
   };
 
+  const handleInputChange = (event: React.FormEvent<HTMLInputElement>) => {
+    const newTitle = event.currentTarget.value;
+    dispatch(
+      kanbanActions.renameColumn({
+        columnId: id,
+        newTitle,
+      })
+    );
+  };
+
   return (
     <div
       className={`bg-slate-900 z-10 w-72 min-w-72 h-[30rem] p-1 cursor-grab active:cursor-grabbing rounded-sm  flex flex-col  ${
@@ -62,8 +76,28 @@ function KanbanColumn({ column }: Props) {
       {...listeners}
       {...attributes}
     >
-      <div className="bg-slate-950 p-2 flex items-center justify-between">
-        <span className="font-bold text-md">{title}</span>
+      <div
+        onClick={() => setIsEditable(true)}
+        onBlur={handleBlur}
+        className="bg-slate-950 p-2 flex items-center justify-between min-h-10"
+      >
+        <div className="cursor-text">
+          {isEditable && (
+            <input
+              onChange={handleInputChange}
+              type="text"
+              className="font-bold text-md w-full h-[1.2rem] bg-slate-950 border-none  outline-none"
+              defaultValue={title}
+              autoFocus={true}
+              onKeyDown={handleKeyDown}
+            />
+          )}
+          {!isEditable && (
+            <span className="font-bold text-md text-wrap break-words">
+              {title}
+            </span>
+          )}
+        </div>
         {!isLastColumn && (
           <button
             className="text-lg text-neutral-500 hover:text-neutral-400 transition"

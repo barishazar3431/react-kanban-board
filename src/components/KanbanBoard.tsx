@@ -12,7 +12,7 @@ import {
   SortableContext,
   horizontalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Column, Task, kanbanActions } from '../store/kanbanSlice';
 import { useAppDispatch, useAppSelector } from '../util/reduxHooks';
 import KanbanColumn from './KanbanColumn';
@@ -28,6 +28,11 @@ function KanbanBoard() {
   const dispatch = useAppDispatch();
   const [activeColumn, setActiveColumn] = useState<Column | null>(null);
   const [activeTask, setActiveTask] = useState<Task | null>(null);
+
+  
+  useEffect(() => {
+    localStorage.setItem('columns', JSON.stringify(columns));
+  }, [columns]);
 
   const sensors = useSensors(
     useSensor(MouseSensor, {
@@ -114,8 +119,6 @@ function KanbanBoard() {
           taskId: activeId,
         })
       );
-
-      console.log('column');
     }
   };
 
