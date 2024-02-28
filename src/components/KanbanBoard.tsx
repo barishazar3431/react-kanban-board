@@ -29,7 +29,6 @@ function KanbanBoard() {
   const [activeColumn, setActiveColumn] = useState<Column | null>(null);
   const [activeTask, setActiveTask] = useState<Task | null>(null);
 
-  
   useEffect(() => {
     localStorage.setItem('columns', JSON.stringify(columns));
   }, [columns]);
@@ -123,8 +122,8 @@ function KanbanBoard() {
   };
 
   return (
-    <div className="h-screen flex items-center w-full max-w-[100rem] mx-auto">
-      <div className="flex items-start min-w-full gap-3 overflow-x-scroll  pb-12">
+    <div className="min-h-screen flex items-center w-full max-w-[100rem] mx-auto ">
+      <div className="flex items-start min-w-full gap-3 overflow-x-scroll  pb-12 lg:flex-col lg:items-center lg:mt-16">
         <DndContext
           sensors={sensors}
           onDragStart={handleDragStart}
