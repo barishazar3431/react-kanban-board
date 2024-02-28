@@ -1,10 +1,15 @@
-import { useSortable } from '@dnd-kit/sortable';
+import {
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { FaPlusCircle } from 'react-icons/fa';
 import { RiDeleteBinLine } from 'react-icons/ri';
 import { Column, kanbanActions } from '../store/kanbanSlice';
 import { useAppDispatch, useAppSelector } from '../util/reduxHooks';
 import KanbanTaskItem from './KanbanTaskItem';
+import { useMemo } from 'react';
 
 type Props = {
   column: Column;
@@ -16,6 +21,8 @@ function KanbanColumn({ column }: Props) {
     (state) => state.kanban.columns.length === 1
   );
   const { tasks, id, title } = column;
+
+  const taskIds = useMemo(() => tasks.map((task) => task.id), [tasks]);
 
   const {
     attributes,
@@ -45,20 +52,10 @@ function KanbanColumn({ column }: Props) {
     dispatch(kanbanActions.addTaskToColumnById(column.id));
   };
 
-  if (isDragging) {
-    return (
-      <div
-        ref={setNodeRef}
-        style={style}
-        className="bg-transparent w-72 min-w-72 h-[30rem] p-1 rounded-sm border border-red-500 z-0"
-      ></div>
-    );
-  }
-
   return (
     <div
-      className={`bg-slate-900 z-10 w-72 min-w-72 h-[30rem] p-1 border border-transparent cursor-grab active:cursor-grabbing rounded-sm flex flex-col  ${
-        isDragging ? '' : ''
+      className={`bg-slate-900 z-10 w-72 min-w-72 h-[30rem] p-1 cursor-grab active:cursor-grabbing rounded-sm  flex flex-col  ${
+        isDragging ? 'opacity-50 z-0' : ''
       }`}
       ref={setNodeRef}
       style={style}
@@ -76,13 +73,15 @@ function KanbanColumn({ column }: Props) {
           </button>
         )}
       </div>
-      {tasks && (
-        <div className="overflow-y-auto p-2 pr-3 flex flex-col gap-2">
-          {tasks.map((task) => (
-            <KanbanTaskItem task={task} columnId={id} />
-          ))}
-        </div>
-      )}
+      <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
+        {tasks && (
+          <div className="overflow-y-auto p-2 pr-3 flex flex-col gap-2">
+            {tasks.map((task) => (
+              <KanbanTaskItem key={task.id} task={task} parentId={column.id} />
+            ))}
+          </div>
+        )}
+      </SortableContext>
       <div className="mt-auto">
         <button
           onClick={createTaskHandler}

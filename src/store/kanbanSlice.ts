@@ -1,6 +1,7 @@
 import { arrayMove } from '@dnd-kit/sortable';
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 import uniqid from 'uniqid';
+import { getParentIdOfTask } from '../util/kanbanUtils';
 
 export type Task = {
   id: string;
@@ -13,7 +14,7 @@ export type Column = {
   tasks: Task[];
 };
 
-type Board = {
+export type Board = {
   columns: Column[];
 };
 
@@ -53,16 +54,12 @@ const kanbanSlice = createSlice({
       if (!column) return;
       column.tasks.push(newTask);
     },
-    deleteTaskById: (
-      state,
-      action: PayloadAction<{ taskId: string; columnId: string }>
-    ) => {
-      const { taskId, columnId } = action.payload;
+    deleteTaskById: (state, action: PayloadAction<string>) => {
+      const taskId = action.payload;
 
-      const column = state.columns.find((column) => column.id === columnId);
-      if (!column) return;
-
-      column.tasks = column.tasks.filter((task) => task.id !== taskId);
+      state.columns.forEach((column) => {
+        column.tasks = column.tasks.filter((task) => task.id !== taskId);
+      });
     },
     moveColumns: (
       state,
@@ -70,6 +67,58 @@ const kanbanSlice = createSlice({
     ) => {
       const { from, to } = action.payload;
       state.columns = arrayMove(state.columns, from, to);
+    },
+    swapItems: (
+      state,
+      action: PayloadAction<{
+        fromId: string;
+        toId: string;
+        parentId: string;
+      }>
+    ) => {
+      const { fromId, toId, parentId } = action.payload;
+
+      const parentIndex = state.columns.findIndex(
+        (column) => column.id === parentId
+      );
+      const fromIndex = state.columns[parentIndex].tasks.findIndex(
+        (task) => task.id === fromId
+      );
+      const toIndex = state.columns[parentIndex].tasks.findIndex(
+        (task) => task.id === toId
+      );
+
+      state.columns[parentIndex].tasks = arrayMove(
+        state.columns[parentIndex].tasks,
+        fromIndex,
+        toIndex
+      );
+    },
+    moveTaskToColumn: (
+      state,
+      action: PayloadAction<{ taskId: string; columnId: string }>
+    ) => {
+      const { taskId, columnId } = action.payload;
+
+      const columnIndex = state.columns.findIndex(
+        (column) => column.id === columnId
+      );
+      const taskParentId = getParentIdOfTask(state.columns, taskId);
+
+      const taskParentIndex = state.columns.findIndex(
+        (column) => column.id === taskParentId
+      );
+
+      const task = state.columns[taskParentIndex].tasks.find(
+        (task) => task.id === taskId
+      );
+
+      if (!task) return;
+
+      state.columns[taskParentIndex].tasks = state.columns[
+        taskParentIndex
+      ].tasks.filter((task) => task.id !== taskId);
+      state.columns[columnIndex].tasks.push(task);
     },
   },
 });
